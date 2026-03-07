@@ -2,376 +2,63 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>사과 나무 키우기🪴</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍎</text></svg>">
     <style>
-        /* [색상 변수] */
+        @font-face { font-family: 'TDTDCloudGothic'; src: url('TDTDCloudGothic.ttf'); }
+        @font-face { font-family: 'TDTDNeon'; src: url('TDTDNeon.ttf'); }
+
         :root {
-            --bg-color: #FDF5E6;  /* 배경색 */
-            --box-color: #F7EED3; /* 목록 박스색 */
-            --text-color: #333;   /* 글자색 */
-            --delete-color: #ff6b6b; /* 삭제 버튼색 */
+            --bg-color: #FDF5E6; --box-color: #F7EED3; --text-color: #333; --delete-color: #ff6b6b;
         }
 
-        body {
-            margin: 0; background-color: var(--bg-color); color: var(--text-color);
-            display: flex; flex-direction: column; align-items: center;
+        /* ✨ 스크롤 절대 방지 설정 */
+        html, body {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow: hidden; /* 화면 밖으로 절대 못 나가게 막음 */
+            background-color: var(--bg-color); color: var(--text-color);
             font-family: 'TDTDNeon', sans-serif;
         }
 
-        header { 
-            width: 100%; text-align: center;
-            margin-top: 50px; font-family: 'TDTDCloudGothic', sans-serif;
-            font-size: 56px; font-weight: bold; 
-        }
+        body { display: flex; flex-direction: column; align-items: center; }
 
-        /* [메인 레이아웃] 나무와 리스트를 가로로 배치 */
-        .container { 
-            display: flex; width: 95%; max-width: 1100px; 
-            margin-top: 60px; justify-content: center; align-items: flex-start; 
-            gap: 120px; 
-        }
-        
-        /* [나무 영역] */
+        header { width: 100%; text-align: center; margin-top: 50px; font-family: 'TDTDCloudGothic', sans-serif; font-size: 56px; font-weight: bold; }
+
+        .container { display: flex; width: 95%; max-width: 1100px; margin-top: 60px; justify-content: center; align-items: flex-start; gap: 120px; }
         .tree-section { flex: 1; text-align: center; position: relative; display: flex; flex-direction: column; align-items: center; margin-top: 40px; }
         .tree-container { position: relative; width: 320px; height: 380px; }
         .pot-img { width: 100%; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); z-index: 5; }
+        .apple-on-tree { position: absolute; font-size: 32px; z-index: 20; filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.1)); opacity: 1 !important; line-height: 1; }
 
-        /* [나무 위 열매] 완료 시 생성되는 빨간 사과 스타일 */
-        .apple-on-tree {
-            position: absolute; font-size: 32px; z-index: 20;
-            filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.1));
-            opacity: 1 !important; line-height: 1;
-        }
-
-        /* [리스트 영역] */
-        .list-section { 
-            flex: 1.5; background-color: var(--box-color); 
-            padding: 25px; border-radius: 20px; box-shadow: 2px 2px 15px rgba(0,0,0,0.05); 
-            position: relative;
-        }
-
-        /* [날짜 헤더] 부분 */
+        .list-section { flex: 1.5; background-color: var(--box-color); padding: 25px; border-radius: 20px; box-shadow: 2px 2px 15px rgba(0,0,0,0.05); position: relative; }
         .date-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; font-family: 'TDTDCloudGothic', sans-serif; }
-        .date-btn { cursor: pointer; font-size: 24px; color: #888; user-select: none; padding: 0 10px; }
-        .today-date { font-size: 22px; font-weight: bold; color: #555; }
-        .not-today-text { opacity: 0.3; } /* 오늘이 아닐 때 흐리게 표시 */
-
-        /* [표 스타일] */
-        .list-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        .list-table th, .list-table td { 
-            border-bottom: 1px dotted #ccc; padding: 18px 0px 18px 40px; 
-            text-align: left; font-size: 20px; position: relative; vertical-align: middle;
-        }
-        .hidden-subject { color: transparent; user-select: none; } /* 같은 과목 숨기기용 */
-
-        /* [삭제 버튼] */
-        .del-btn { 
-            position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
-            color: var(--delete-color); font-weight: bold; font-size: 26px; 
-            cursor: pointer; visibility: hidden; 
-        }
-        .list-table tr:hover .del-btn { visibility: visible; }
-
-        /* [상태 동그라미] ✅ ❎ ❕ 표시되는 곳 */
-        .status-circle {
-            float: right; width: 32px; height: 32px; border-radius: 50%;
-            border: 2px solid #ccc; display: flex; align-items: center; 
-            justify-content: center; font-size: 18px; background: #fff; margin-right: 10px;
-        }
-
-        .add-btn { text-align: center; cursor: pointer; font-size: 32px; padding: 10px; color: #888; }
-        
-        /* [상세보기 헤더] 제목 중앙 + 이모지 우측 하단 고정 핵심 영역! */
-        .detail-header-container {
-            position: relative; 
-            width: 95%; max-width: 900px; margin: 40px auto 0;
-            padding-bottom: 20px; border-bottom: 2px solid #eee;
-            display: flex; justify-content: center; align-items: center;
-        }
-        #detail-title { font-size: 42px; margin: 0; text-align: center; padding: 0 100px; }
-        .detail-emojis {
-            position: absolute; right: 0; bottom: 15px; 
-            display: flex; flex-direction: column; 
-            font-size: 24px; line-height: 1.4; text-align: right;
-        }
-
-        /* [모달창] */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 100; }
-        .modal-content { background: var(--box-color); padding: 40px; border-radius: 20px; width: 90%; max-width: 500px; }
-        .modal-content input { width: 92%; border: none; border-bottom: 1px solid #aaa; background: transparent; margin: 10px 0 25px 0; padding: 8px; font-size: 18px; font-family: 'TDTDNeon'; }
-        .save-btn { background: #fff; border: 1px solid #888; padding: 10px 25px; border-radius: 10px; cursor: pointer; float: right; margin-left: 10px; }
-
-        /* [상세보기 사과 알맹이들] */
-        #detail-view { display: none; text-align: left; width: 100%; }
-        .apple-row { display: flex; justify-content: center; gap: 15px; margin-top: 60px; flex-wrap: wrap; padding: 0 20px; }
-        .apple-item { width: 70px; height: auto; cursor: pointer; }
-    </style>
-</head>
-<body onload="initApp()">
-
-    <div id="home-view">
-        <header>사과 나무 키우기 🍎</header>
-        <div class="container">
-            <div class="tree-section">
-                <div class="tree-container" id="tree-container">
-                    <img src="tree_pot.png" class="pot-img" onerror="this.src='https://via.placeholder.com/320x380?text=Tree+Image'">
-                    </div>
-            </div>
-            <div class="list-section">
-                <div class="date-header">
-                    <div class="date-btn" onclick="changeDate(-1)">&lt;</div>
-                    <div id="today-display" class="today-date"></div>
-                    <div class="date-btn" onclick="changeDate(1)">&gt;</div>
-                </div>
-                <table class="list-table">
-                    <colgroup><col style="width: 40%;"><col style="width: 60%;"></colgroup>
-                    <thead><tr><th>과목</th><th>할 일</th></tr></thead>
-                    <tbody id="task-body"></tbody>
-                </table>
-                <div class="add-btn" onclick="openModal()">+</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal" id="modal">
-        <div class="modal-content">
-            <div class="modal-label">과목:</div><input type="text" id="in-subject" placeholder="예: 국어">
-            <div class="modal-label">할 일:</div><input type="text" id="in-task" placeholder="예: 문제집 3쪽">
-            <div class="modal-label">사과 개수:</div><input type="number" id="in-count" value="10">
-            <button class="save-btn" onclick="saveNewTask()">저장</button>
-            <button class="save-btn" onclick="closeModal()">취소</button>
-        </div>
-    </div>
-
-    <div id="detail-view">
-        <header>사과 나무 키우기 🍎</header>
-        <div class="detail-header-container">
-            <h2 id="detail-title">과제 이름</h2>
-            <div class="detail-emojis">
-                <span>🔴 🤩</span>
-                <span>🟢 😉</span>
-            </div>
-        </div>
-        <div class="apple-row" id="apple-container">
-            </div>
-        <div class="back-btn" onclick="showHome()" style="text-align: center; margin-top: 60px; cursor: pointer; text-decoration: underline; color: #666; font-size: 24px;">HOME</div>
-    </div>
-
-    <script>
-        let currentTargetIndex = null; 
-        let currentTasks = []; 
-        let currentDate = new Date(); 
-        const realTodayStr = getFormatDate(new Date());
-
-        // 사과가 나무 어디에 달릴지 정해둔 좌표값들이에요
-        const applePositions = [
-            {t:40, l:130}, {t:60, l:80}, {t:55, l:180}, {t:100, l:50}, {t:95, l:210},
-            {t:130, l:100}, {t:125, l:170}, {t:80, l:130}, {t:160, l:60}, {t:170, l:200},
-            {t:20, l:110}, {t:35, l:165}, {t:110, l:135}, {t:150, l:130}, {t:180, l:100}
-        ];
-
-        /* [기초 함수들] */
-        function initApp() { renderDate(); loadDataByDate(); }
-        function getFormatDate(date) {
-            const y = date.getFullYear();
-            const m = String(date.getMonth() + 1).padStart(2, '0');
-            const d = String(date.getDate()).padStart(2, '0');
-            return `${y}.${m}.${d}`;
-        }
-        function renderDate() {
-            const days = ['일', '월', '화', '수', '목', '금', '토'];
-            const dateStr = getFormatDate(currentDate);
-            document.getElementById('today-display').innerText = `${dateStr}(${days[currentDate.getDay()]})`;
-            if(dateStr === realTodayStr) document.getElementById('today-display').classList.remove('not-today-text');
-            else document.getElementById('today-display').classList.add('not-today-text');
-        }
-        function changeDate(offset) { currentDate.setDate(currentDate.getDate() + offset); renderDate(); loadDataByDate(); }
-        function getDateKey() { return `appleTasks_${getFormatDate(currentDate).replace(/\./g, '')}`; }
-
-        /* [데이터 관리] 저장하고 불러오기 */
-        function loadDataByDate() {
-            currentTasks = JSON.parse(localStorage.getItem(getDateKey())) || [];
-            renderTaskList(); 
-            updateCumulativeTree(); // 나무 상태도 새로고침
-        }
-        function saveData() { 
-            localStorage.setItem(getDateKey(), JSON.stringify(currentTasks)); 
-            updateCumulativeTree(); 
-        }
-
-        /* [나무 업데이트] 완료된 날짜 수만큼 나무에 사과 달기 */
-        function updateCumulativeTree() {
-            const container = document.getElementById('tree-container');
-            container.querySelectorAll('.apple-on-tree').forEach(a => a.remove()); // 기존 사과 다 떼기
-            let completedDatesCount = 0;
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key.startsWith('appleTasks_')) {
-                    const tasks = JSON.parse(localStorage.getItem(key));
-                    // 그날의 모든 일이 사과(빨간색='2')로 가득 찼는지 확인
-                    if (tasks.length > 0 && tasks.every(t => t.apples.split('').every(s => s === '2'))) {
-                        completedDatesCount++;
-                    }
-                }
-            }
-            for(let i = 0; i < completedDatesCount; i++) {
-                const pos = applePositions[i % applePositions.length];
-                const appleEl = document.createElement('div');
-                appleEl.className = 'apple-on-tree';
-                appleEl.innerText = '🍎';
-                appleEl.style.top = pos.t + 'px'; appleEl.style.left = pos.l + 'px';
-                container.appendChild(appleEl);
-            }
-        }
-
-        /* [리스트 그리기] 메인 화면의 할 일 목록 출력 */
-        function renderTaskList() {
-            const tbody = document.getElementById('task-body');
-            tbody.innerHTML = '';
-            let lastSubject = "";
-            currentTasks.forEach((item, index) => {
-                const tr = document.createElement('tr');
-                tr.onclick = () => showDetail(index);
-                const isDup = (item.subject === lastSubject);
-                const subClass = isDup ? "hidden-subject" : "";
-                lastSubject = item.subject;
-                
-                // 상태 이모지 결정 로직
-                let emoji = '';
-                const data = item.apples;
-                if (!data.includes('0') && !data.includes('1') && data.includes('2')) emoji = '✅'; 
-                else if (!data.includes('0') && data.includes('1')) emoji = '❎'; 
-                else if (data.includes('1') || data.includes('2')) emoji = '❕';
-
-                tr.innerHTML = `<td><span class="del-btn" onclick="deleteTask(event, ${index})">-</span><span class="${subClass}">${item.subject}</span></td><td>${item.task}<div class="status-circle">${emoji}</div></td>`;
-                tbody.appendChild(tr);
-            });
-        }
-
-        /* [상세 페이지] 사과 클릭해서 색 바꾸기 */
-        function showDetail(index) {
-            currentTargetIndex = index;
-            const item = currentTasks[index];
-            document.getElementById('home-view').style.display = 'none';
-            document.getElementById('detail-view').style.display = 'block';
-            document.getElementById('detail-title').innerText = item.task;
-            const container = document.getElementById('apple-container');
-            container.innerHTML = '';
-            
-            // 사과 문자열('0012...')을 돌면서 이미지 생성
-            item.apples.split('').forEach((state, i) => {
-                const img = document.createElement('img');
-                img.className = 'apple-item';
-                // 0: 라인, 1: 초록, 2: 빨강
-                img.src = state === '1' ? 'apple_green.png' : state === '2' ? 'apple_red.png' : 'apple_line.png';
-                img.onclick = () => {
-                    let arr = item.apples.split('');
-                    arr[i] = ((parseInt(state) + 1) % 3).toString(); // 0->1->2->0 순환
-                    item.apples = arr.join('');
-                    saveData(); showDetail(index); // 화면 갱신
-                };
-                container.appendChild(img);
-            });
-        }
-
-        /* [홈으로 가기] */
-        function showHome() { renderTaskList(); document.getElementById('home-view').style.display = 'block'; document.getElementById('detail-view').style.display = 'none'; }
-
-        /* [할 일 추가/삭제] */
-        function saveNewTask() {
-            const sub = document.getElementById('in-subject').value, task = document.getElementById('in-task').value, count = parseInt(document.getElementById('in-count').value) || 10;
-            if(!sub || !task) return;
-            currentTasks.push({ subject: sub, task: task, apples: '0'.repeat(count) });
-            currentTasks.sort((a, b) => a.subject.localeCompare(b.subject)); // 과목 가나다순 정렬
-            saveData(); renderTaskList(); closeModal();
-            document.getElementById('in-subject').value = ''; document.getElementById('in-task').value = '';
-        }
-        function deleteTask(event, index) { event.stopPropagation(); if(confirm("삭제할까요?")) { currentTasks.splice(index, 1); saveData(); renderTaskList(); } }
-        function openModal() { document.getElementById('modal').style.display = 'flex'; }
-        function closeModal() { document.getElementById('modal').style.display = 'none'; }
-    </script>
-</body>
-</html>            flex: 1; text-align: center; position: relative; 
-            display: flex; flex-direction: column; align-items: center;
-            margin-top: 40px; 
-        }
-        
-        .tree-container { position: relative; width: 320px; height: 380px; }
-        
-        .pot-img { 
-            width: 100%; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); 
-            z-index: 5; 
-        }
-
-        .apple-on-tree {
-            position: absolute; font-size: 32px; z-index: 20;
-            filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.1));
-            opacity: 1 !important; line-height: 1;
-        }
-
-        .list-section { 
-            flex: 1.5; background-color: var(--box-color); 
-            padding: 25px; border-radius: 20px; box-shadow: 2px 2px 15px rgba(0,0,0,0.05); 
-            position: relative;
-        }
-
-        .date-header {
-            display: flex; align-items: center; justify-content: space-between;
-            margin-bottom: 20px; font-family: 'TDTDCloudGothic', sans-serif;
-        }
         .date-btn { cursor: pointer; font-size: 24px; color: #888; user-select: none; padding: 0 10px; }
         .today-date { font-size: 22px; font-weight: bold; color: #555; }
         .not-today-text { opacity: 0.3; }
 
         .list-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        .list-table th, .list-table td { 
-            border-bottom: 1px dotted #ccc; padding: 18px 0px 18px 40px; 
-            text-align: left; font-size: 20px; position: relative; vertical-align: middle;
-        }
-
+        .list-table th, .list-table td { border-bottom: 1px dotted #ccc; padding: 18px 0px 18px 40px; text-align: left; font-size: 20px; position: relative; vertical-align: middle; }
         .hidden-subject { color: transparent; user-select: none; }
-
-        .del-btn { 
-            position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
-            color: var(--delete-color); font-weight: bold; font-size: 26px; 
-            cursor: pointer; visibility: hidden; 
-        }
+        .del-btn { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--delete-color); font-weight: bold; font-size: 26px; cursor: pointer; visibility: hidden; }
         .list-table tr:hover .del-btn { visibility: visible; }
-
-        .status-circle {
-            float: right; width: 32px; height: 32px; border-radius: 50%;
-            border: 2px solid #ccc; display: flex; align-items: center; 
-            justify-content: center; font-size: 18px; background: #fff; margin-right: 10px;
-        }
-
+        .status-circle { float: right; width: 32px; height: 32px; border-radius: 50%; border: 2px solid #ccc; display: flex; align-items: center; justify-content: center; font-size: 18px; background: #fff; margin-right: 10px; }
         .add-btn { text-align: center; cursor: pointer; font-size: 32px; padding: 10px; color: #888; }
         
-        /* 🛠 상세보기 헤더 레이아웃 수정 */
-        .detail-header-container {
-            position: relative; /* 자식 요소인 이모지를 오른쪽 끝에 고정하기 위함 */
-            width: 95%; max-width: 900px; margin: 40px auto 0;
-            padding-bottom: 15px; border-bottom: 2px solid #eee;
-            display: flex; justify-content: center; align-items: center;
-        }
-        #detail-title { font-size: 42px; margin: 0; text-align: center; }
-        .detail-emojis {
-            position: absolute; right: 0; bottom: 10px; /* 오른쪽 끝 하단 고정 */
-            display: flex; flex-direction: column; 
-            font-size: 24px; line-height: 1.4; text-align: right;
-        }
+        .detail-header-container { position: relative; width: 95%; max-width: 900px; margin: 40px auto 0; padding-bottom: 20px; border-bottom: 2px solid #eee; display: flex; justify-content: center; align-items: center; }
+        #detail-title { font-size: 42px; margin: 0; text-align: center; padding: 0 100px; }
+        .detail-emojis { position: absolute; right: 0; bottom: 15px; display: flex; flex-direction: column; font-size: 24px; line-height: 1.4; text-align: right; }
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 100; }
         .modal-content { background: var(--box-color); padding: 40px; border-radius: 20px; width: 90%; max-width: 500px; }
         .modal-content input { width: 92%; border: none; border-bottom: 1px solid #aaa; background: transparent; margin: 10px 0 25px 0; padding: 8px; font-size: 18px; font-family: 'TDTDNeon'; }
         .save-btn { background: #fff; border: 1px solid #888; padding: 10px 25px; border-radius: 10px; cursor: pointer; float: right; margin-left: 10px; }
-        #detail-view { display: none; text-align: left; width: 100%; }
+        #detail-view { display: none; text-align: left; width: 100%; height: 100vh; background-color: var(--bg-color); position: fixed; top: 0; left: 0; z-index: 50; }
         .apple-row { display: flex; justify-content: center; gap: 15px; margin-top: 60px; flex-wrap: wrap; padding: 0 20px; }
         .apple-item { width: 70px; height: auto; cursor: pointer; }
     </style>
 </head>
 <body onload="initApp()">
-
     <div id="home-view">
         <header>사과 나무 키우기 🍎</header>
         <div class="container">
@@ -386,7 +73,6 @@
                     <div id="today-display" class="today-date"></div>
                     <div class="date-btn" onclick="changeDate(1)">&gt;</div>
                 </div>
-                
                 <table class="list-table">
                     <colgroup><col style="width: 40%;"><col style="width: 60%;"></colgroup>
                     <thead><tr><th>과목</th><th>할 일</th></tr></thead>
@@ -411,121 +97,28 @@
         <header>사과 나무 키우기 🍎</header>
         <div class="detail-header-container">
             <h2 id="detail-title"></h2>
-            <div class="detail-emojis">
-                <span>🔴 🤩</span>
-                <span>🟢 😉</span>
-            </div>
+            <div class="detail-emojis"><span>🔴 🤩</span><span>🟢 😉</span></div>
         </div>
         <div class="apple-row" id="apple-container"></div>
         <div class="back-btn" onclick="showHome()" style="text-align: center; margin-top: 60px; cursor: pointer; text-decoration: underline; color: #666; font-size: 24px;">HOME</div>
     </div>
 
     <script>
-        /* 자바스크립트 로직 (이전과 동일) */
-        let currentTargetIndex = null; 
-        let currentTasks = []; 
-        let currentDate = new Date(); 
-        const realTodayStr = getFormatDate(new Date());
-
-        const applePositions = [
-            {t:40, l:130}, {t:60, l:80}, {t:55, l:180}, {t:100, l:50}, {t:95, l:210},
-            {t:130, l:100}, {t:125, l:170}, {t:80, l:130}, {t:160, l:60}, {t:170, l:200},
-            {t:20, l:110}, {t:35, l:165}, {t:110, l:135}, {t:150, l:130}, {t:180, l:100}
-        ];
-
+        let currentTargetIndex = null; let currentTasks = []; let currentDate = new Date(); const realTodayStr = getFormatDate(new Date());
+        const applePositions = [{t:40, l:130}, {t:60, l:80}, {t:55, l:180}, {t:100, l:50}, {t:95, l:210}, {t:130, l:100}, {t:125, l:170}, {t:80, l:130}, {t:160, l:60}, {t:170, l:200}, {t:20, l:110}, {t:35, l:165}, {t:110, l:135}, {t:150, l:130}, {t:180, l:100}];
         function initApp() { renderDate(); loadDataByDate(); }
-        function getFormatDate(date) {
-            const y = date.getFullYear();
-            const m = String(date.getMonth() + 1).padStart(2, '0');
-            const d = String(date.getDate()).padStart(2, '0');
-            return `${y}.${m}.${d}`;
-        }
-        function renderDate() {
-            const days = ['일', '월', '화', '수', '목', '금', '토'];
-            const dateStr = getFormatDate(currentDate);
-            document.getElementById('today-display').innerText = `${dateStr}(${days[currentDate.getDay()]})`;
-            if(dateStr === realTodayStr) document.getElementById('today-display').classList.remove('not-today-text');
-            else document.getElementById('today-display').classList.add('not-today-text');
-        }
+        function getFormatDate(date) { const y = date.getFullYear(); const m = String(date.getMonth() + 1).padStart(2, '0'); const d = String(date.getDate()).padStart(2, '0'); return `${y}.${m}.${d}`; }
+        function renderDate() { const days = ['일', '월', '화', '수', '목', '금', '토']; const dateStr = getFormatDate(currentDate); document.getElementById('today-display').innerText = `${dateStr}(${days[currentDate.getDay()]})`; if(dateStr === realTodayStr) document.getElementById('today-display').classList.remove('not-today-text'); else document.getElementById('today-display').classList.add('not-today-text'); }
         function changeDate(offset) { currentDate.setDate(currentDate.getDate() + offset); renderDate(); loadDataByDate(); }
         function getDateKey() { return `appleTasks_${getFormatDate(currentDate).replace(/\./g, '')}`; }
-        function loadDataByDate() {
-            currentTasks = JSON.parse(localStorage.getItem(getDateKey())) || [];
-            renderTaskList(); updateCumulativeTree();
-        }
+        function loadDataByDate() { currentTasks = JSON.parse(localStorage.getItem(getDateKey())) || []; renderTaskList(); updateCumulativeTree(); }
         function saveData() { localStorage.setItem(getDateKey(), JSON.stringify(currentTasks)); updateCumulativeTree(); }
-        function isDataAllDone(tasks) {
-            return tasks.length > 0 && tasks.every(item => item.apples.split('').every(s => s === '2'));
-        }
-
-        function updateCumulativeTree() {
-            const container = document.getElementById('tree-container');
-            container.querySelectorAll('.apple-on-tree').forEach(a => a.remove());
-            let completedDatesCount = 0;
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key.startsWith('appleTasks_') && isDataAllDone(JSON.parse(localStorage.getItem(key)))) completedDatesCount++;
-            }
-            for(let i = 0; i < completedDatesCount; i++) {
-                const pos = applePositions[i % applePositions.length];
-                const appleEl = document.createElement('div');
-                appleEl.className = 'apple-on-tree';
-                appleEl.innerText = '🍎';
-                appleEl.style.top = pos.t + 'px'; appleEl.style.left = pos.l + 'px';
-                container.appendChild(appleEl);
-            }
-        }
-
-        function renderTaskList() {
-            const tbody = document.getElementById('task-body');
-            tbody.innerHTML = '';
-            let lastSubject = "";
-            currentTasks.forEach((item, index) => {
-                const tr = document.createElement('tr');
-                tr.onclick = () => showDetail(index);
-                const isDup = (item.subject === lastSubject);
-                const subClass = isDup ? "hidden-subject" : "";
-                lastSubject = item.subject;
-                let emoji = '';
-                const data = item.apples;
-                if (!data.includes('0') && !data.includes('1') && data.includes('2')) emoji = '✅'; 
-                else if (!data.includes('0') && data.includes('1')) emoji = '❎'; 
-                else if (data.includes('1') || data.includes('2')) emoji = '❕';
-                tr.innerHTML = `<td><span class="del-btn" onclick="deleteTask(event, ${index})">-</span><span class="${subClass}">${item.subject}</span></td><td>${item.task}<div class="status-circle">${emoji}</div></td>`;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function showDetail(index) {
-            currentTargetIndex = index;
-            const item = currentTasks[index];
-            document.getElementById('home-view').style.display = 'none';
-            document.getElementById('detail-view').style.display = 'block';
-            document.getElementById('detail-title').innerText = item.task;
-            const container = document.getElementById('apple-container');
-            container.innerHTML = '';
-            item.apples.split('').forEach((state, i) => {
-                const img = document.createElement('img');
-                img.className = 'apple-item';
-                img.src = state === '1' ? 'apple_green.png' : state === '2' ? 'apple_red.png' : 'apple_line.png';
-                img.onclick = () => {
-                    let arr = item.apples.split('');
-                    arr[i] = ((parseInt(state) + 1) % 3).toString();
-                    item.apples = arr.join('');
-                    saveData(); showDetail(index);
-                };
-                container.appendChild(img);
-            });
-        }
+        function isDataAllDone(tasks) { return tasks.length > 0 && tasks.every(item => item.apples.split('').every(s => s === '2')); }
+        function updateCumulativeTree() { const container = document.getElementById('tree-container'); container.querySelectorAll('.apple-on-tree').forEach(a => a.remove()); let completedDatesCount = 0; for (let i = 0; i < localStorage.length; i++) { const key = localStorage.key(i); if (key.startsWith('appleTasks_') && isDataAllDone(JSON.parse(localStorage.getItem(key)))) completedDatesCount++; } for(let i = 0; i < completedDatesCount; i++) { const pos = applePositions[i % applePositions.length]; const appleEl = document.createElement('div'); appleEl.className = 'apple-on-tree'; appleEl.innerText = '🍎'; appleEl.style.top = pos.t + 'px'; appleEl.style.left = pos.l + 'px'; container.appendChild(appleEl); } }
+        function renderTaskList() { const tbody = document.getElementById('task-body'); tbody.innerHTML = ''; let lastSubject = ""; currentTasks.forEach((item, index) => { const tr = document.createElement('tr'); tr.onclick = () => showDetail(index); const isDup = (item.subject === lastSubject); const subClass = isDup ? "hidden-subject" : ""; lastSubject = item.subject; let emoji = ''; const data = item.apples; if (!data.includes('0') && !data.includes('1') && data.includes('2')) emoji = '✅'; else if (!data.includes('0') && data.includes('1')) emoji = '❎'; else if (data.includes('1') || data.includes('2')) emoji = '❕'; tr.innerHTML = `<td><span class="del-btn" onclick="deleteTask(event, ${index})">-</span><span class="${subClass}">${item.subject}</span></td><td>${item.task}<div class="status-circle">${emoji}</div></td>`; tbody.appendChild(tr); }); }
+        function showDetail(index) { currentTargetIndex = index; const item = currentTasks[index]; document.getElementById('home-view').style.display = 'none'; document.getElementById('detail-view').style.display = 'block'; document.getElementById('detail-title').innerText = item.task; const container = document.getElementById('apple-container'); container.innerHTML = ''; item.apples.split('').forEach((state, i) => { const img = document.createElement('img'); img.className = 'apple-item'; img.src = state === '1' ? 'apple_green.png' : state === '2' ? 'apple_red.png' : 'apple_line.png'; img.onclick = () => { let arr = item.apples.split(''); arr[i] = ((parseInt(state) + 1) % 3).toString(); item.apples = arr.join(''); saveData(); showDetail(index); }; container.appendChild(img); }); }
         function showHome() { renderTaskList(); document.getElementById('home-view').style.display = 'block'; document.getElementById('detail-view').style.display = 'none'; }
-        function saveNewTask() {
-            const sub = document.getElementById('in-subject').value, task = document.getElementById('in-task').value, count = parseInt(document.getElementById('in-count').value) || 10;
-            if(!sub || !task) return;
-            currentTasks.push({ subject: sub, task: task, apples: '0'.repeat(count) });
-            currentTasks.sort((a, b) => a.subject.localeCompare(b.subject));
-            saveData(); renderTaskList(); closeModal();
-            document.getElementById('in-subject').value = ''; document.getElementById('in-task').value = '';
-        }
+        function saveNewTask() { const sub = document.getElementById('in-subject').value, task = document.getElementById('in-task').value, count = parseInt(document.getElementById('in-count').value) || 10; if(!sub || !task) return; currentTasks.push({ subject: sub, task: task, apples: '0'.repeat(count) }); currentTasks.sort((a, b) => a.subject.localeCompare(b.subject)); saveData(); renderTaskList(); closeModal(); document.getElementById('in-subject').value = ''; document.getElementById('in-task').value = ''; }
         function deleteTask(event, index) { event.stopPropagation(); if(confirm("삭제할까요?")) { currentTasks.splice(index, 1); saveData(); renderTaskList(); } }
         function openModal() { document.getElementById('modal').style.display = 'flex'; }
         function closeModal() { document.getElementById('modal').style.display = 'none'; }
