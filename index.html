@@ -13,16 +13,13 @@
             --bg-color: #FDF5E6; --box-color: #F7EED3; --text-color: #333; --delete-color: #ff6b6b;
         }
 
-        /* ✨ 스크롤 절대 방지 설정 */
         html, body {
             margin: 0; padding: 0; width: 100%; height: 100%;
-            overflow: hidden; /* 화면 밖으로 절대 못 나가게 막음 */
-            background-color: var(--bg-color); color: var(--text-color);
+            overflow: hidden; background-color: var(--bg-color); color: var(--text-color);
             font-family: 'TDTDNeon', sans-serif;
         }
 
         body { display: flex; flex-direction: column; align-items: center; }
-
         header { width: 100%; text-align: center; margin-top: 50px; font-family: 'TDTDCloudGothic', sans-serif; font-size: 56px; font-weight: bold; }
 
         .container { display: flex; width: 95%; max-width: 1100px; margin-top: 60px; justify-content: center; align-items: flex-start; gap: 120px; }
@@ -106,6 +103,7 @@
     <script>
         let currentTargetIndex = null; let currentTasks = []; let currentDate = new Date(); const realTodayStr = getFormatDate(new Date());
         const applePositions = [{t:40, l:130}, {t:60, l:80}, {t:55, l:180}, {t:100, l:50}, {t:95, l:210}, {t:130, l:100}, {t:125, l:170}, {t:80, l:130}, {t:160, l:60}, {t:170, l:200}, {t:20, l:110}, {t:35, l:165}, {t:110, l:135}, {t:150, l:130}, {t:180, l:100}];
+        
         function initApp() { renderDate(); loadDataByDate(); }
         function getFormatDate(date) { const y = date.getFullYear(); const m = String(date.getMonth() + 1).padStart(2, '0'); const d = String(date.getDate()).padStart(2, '0'); return `${y}.${m}.${d}`; }
         function renderDate() { const days = ['일', '월', '화', '수', '목', '금', '토']; const dateStr = getFormatDate(currentDate); document.getElementById('today-display').innerText = `${dateStr}(${days[currentDate.getDay()]})`; if(dateStr === realTodayStr) document.getElementById('today-display').classList.remove('not-today-text'); else document.getElementById('today-display').classList.add('not-today-text'); }
@@ -113,12 +111,94 @@
         function getDateKey() { return `appleTasks_${getFormatDate(currentDate).replace(/\./g, '')}`; }
         function loadDataByDate() { currentTasks = JSON.parse(localStorage.getItem(getDateKey())) || []; renderTaskList(); updateCumulativeTree(); }
         function saveData() { localStorage.setItem(getDateKey(), JSON.stringify(currentTasks)); updateCumulativeTree(); }
-        function isDataAllDone(tasks) { return tasks.length > 0 && tasks.every(item => item.apples.split('').every(s => s === '2')); }
-        function updateCumulativeTree() { const container = document.getElementById('tree-container'); container.querySelectorAll('.apple-on-tree').forEach(a => a.remove()); let completedDatesCount = 0; for (let i = 0; i < localStorage.length; i++) { const key = localStorage.key(i); if (key.startsWith('appleTasks_') && isDataAllDone(JSON.parse(localStorage.getItem(key)))) completedDatesCount++; } for(let i = 0; i < completedDatesCount; i++) { const pos = applePositions[i % applePositions.length]; const appleEl = document.createElement('div'); appleEl.className = 'apple-on-tree'; appleEl.innerText = '🍎'; appleEl.style.top = pos.t + 'px'; appleEl.style.left = pos.l + 'px'; container.appendChild(appleEl); } }
-        function renderTaskList() { const tbody = document.getElementById('task-body'); tbody.innerHTML = ''; let lastSubject = ""; currentTasks.forEach((item, index) => { const tr = document.createElement('tr'); tr.onclick = () => showDetail(index); const isDup = (item.subject === lastSubject); const subClass = isDup ? "hidden-subject" : ""; lastSubject = item.subject; let emoji = ''; const data = item.apples; if (!data.includes('0') && !data.includes('1') && data.includes('2')) emoji = '✅'; else if (!data.includes('0') && data.includes('1')) emoji = '❎'; else if (data.includes('1') || data.includes('2')) emoji = '❕'; tr.innerHTML = `<td><span class="del-btn" onclick="deleteTask(event, ${index})">-</span><span class="${subClass}">${item.subject}</span></td><td>${item.task}<div class="status-circle">${emoji}</div></td>`; tbody.appendChild(tr); }); }
-        function showDetail(index) { currentTargetIndex = index; const item = currentTasks[index]; document.getElementById('home-view').style.display = 'none'; document.getElementById('detail-view').style.display = 'block'; document.getElementById('detail-title').innerText = item.task; const container = document.getElementById('apple-container'); container.innerHTML = ''; item.apples.split('').forEach((state, i) => { const img = document.createElement('img'); img.className = 'apple-item'; img.src = state === '1' ? 'apple_green.png' : state === '2' ? 'apple_red.png' : 'apple_line.png'; img.onclick = () => { let arr = item.apples.split(''); arr[i] = ((parseInt(state) + 1) % 3).toString(); item.apples = arr.join(''); saveData(); showDetail(index); }; container.appendChild(img); }); }
+
+        /* ✨ 나무 사과 결정 로직 */
+        function getDayStatus(tasks) {
+            if (tasks.length === 0) return null;
+            // 모든 할 일의 사과들에 '0'(회색)이 하나도 없어야 함 (일단 다 채움)
+            const isComplete = tasks.every(t => !t.apples.includes('0'));
+            if (!isComplete) return null;
+
+            // 다 채웠는데, 모든 사과가 '2'(빨간색)인가?
+            const isAllRed = tasks.every(t => t.apples.split('').every(s => s === '2'));
+            return isAllRed ? '🍎' : '🍏';
+        }
+
+        function updateCumulativeTree() {
+            const container = document.getElementById('tree-container');
+            container.querySelectorAll('.apple-on-tree').forEach(a => a.remove());
+            
+            let fruitList = [];
+            // 모든 날짜를 돌면서 상태 확인
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('appleTasks_')) {
+                    const status = getDayStatus(JSON.parse(localStorage.getItem(key)));
+                    if (status) fruitList.push(status);
+                }
+            }
+
+            fruitList.forEach((emoji, i) => {
+                const pos = applePositions[i % applePositions.length];
+                const appleEl = document.createElement('div');
+                appleEl.className = 'apple-on-tree';
+                appleEl.innerText = emoji;
+                appleEl.style.top = pos.t + 'px'; appleEl.style.left = pos.l + 'px';
+                container.appendChild(appleEl);
+            });
+        }
+
+        function renderTaskList() {
+            const tbody = document.getElementById('task-body');
+            tbody.innerHTML = '';
+            let lastSubject = "";
+            currentTasks.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.onclick = () => showDetail(index);
+                const isDup = (item.subject === lastSubject);
+                const subClass = isDup ? "hidden-subject" : "";
+                lastSubject = item.subject;
+                let emoji = '';
+                const data = item.apples;
+                if (!data.includes('0') && !data.includes('1') && data.includes('2')) emoji = '✅';
+                else if (!data.includes('0') && data.includes('1')) emoji = '❎';
+                else if (data.includes('1') || data.includes('2')) emoji = '❕';
+                tr.innerHTML = `<td><span class="del-btn" onclick="deleteTask(event, ${index})">-</span><span class="${subClass}">${item.subject}</span></td><td>${item.task}<div class="status-circle">${emoji}</div></td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function showDetail(index) {
+            currentTargetIndex = index;
+            const item = currentTasks[index];
+            document.getElementById('home-view').style.display = 'none';
+            document.getElementById('detail-view').style.display = 'block';
+            document.getElementById('detail-title').innerText = item.task;
+            const container = document.getElementById('apple-container');
+            container.innerHTML = '';
+            item.apples.split('').forEach((state, i) => {
+                const img = document.createElement('img');
+                img.className = 'apple-item';
+                img.src = state === '1' ? 'apple_green.png' : state === '2' ? 'apple_red.png' : 'apple_line.png';
+                img.onclick = () => {
+                    let arr = item.apples.split('');
+                    arr[i] = ((parseInt(state) + 1) % 3).toString();
+                    item.apples = arr.join('');
+                    saveData(); showDetail(index);
+                };
+                container.appendChild(img);
+            });
+        }
+
         function showHome() { renderTaskList(); document.getElementById('home-view').style.display = 'block'; document.getElementById('detail-view').style.display = 'none'; }
-        function saveNewTask() { const sub = document.getElementById('in-subject').value, task = document.getElementById('in-task').value, count = parseInt(document.getElementById('in-count').value) || 10; if(!sub || !task) return; currentTasks.push({ subject: sub, task: task, apples: '0'.repeat(count) }); currentTasks.sort((a, b) => a.subject.localeCompare(b.subject)); saveData(); renderTaskList(); closeModal(); document.getElementById('in-subject').value = ''; document.getElementById('in-task').value = ''; }
+        function saveNewTask() {
+            const sub = document.getElementById('in-subject').value, task = document.getElementById('in-task').value, count = parseInt(document.getElementById('in-count').value) || 10;
+            if(!sub || !task) return;
+            currentTasks.push({ subject: sub, task: task, apples: '0'.repeat(count) });
+            currentTasks.sort((a, b) => a.subject.localeCompare(b.subject));
+            saveData(); renderTaskList(); closeModal();
+            document.getElementById('in-subject').value = ''; document.getElementById('in-task').value = '';
+        }
         function deleteTask(event, index) { event.stopPropagation(); if(confirm("삭제할까요?")) { currentTasks.splice(index, 1); saveData(); renderTaskList(); } }
         function openModal() { document.getElementById('modal').style.display = 'flex'; }
         function closeModal() { document.getElementById('modal').style.display = 'none'; }
