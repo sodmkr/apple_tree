@@ -85,7 +85,6 @@
 
     <script>
         let todayData = null;
-        // 나무에 사과가 배치될 고정 위치들
         const applePositions = [{t:50, l:150}, {t:80, l:90}, {t:75, l:210}, {t:130, l:60}, {t:125, l:250}, {t:160, l:120}, {t:155, l:180}, {t:110, l:150}, {t:200, l:80}, {t:210, l:230}, {t:30, l:120}, {t:45, l:195}, {t:140, l:155}, {t:180, l:150}, {t:220, l:120}];
 
         function initApp() {
@@ -93,7 +92,6 @@
             loadData();
         }
 
-        // 하루마다 리셋하는 로직 (날짜가 바뀌었으면 기존 데이터 삭제)
         function checkDailyReset() {
             const todayStr = new Date().toDateString();
             const lastSavedDay = localStorage.getItem('apple_saved_date');
@@ -114,7 +112,6 @@
             renderTree();
         }
 
-        // 메인 나무 화면 그리기
         function renderTree() {
             const container = document.getElementById('tree-container');
             container.querySelectorAll('.apple-on-tree').forEach(a => a.remove());
@@ -127,11 +124,9 @@
 
             hint.innerText = `오늘의 목표: ${todayData.task}`;
 
-            // 사과가 다 채워졌는지 확인 ('0'이 하나도 없으면 완수)
             const isComplete = !todayData.apples.includes('0');
             const fruitEmoji = isComplete ? '🍎' : '🍏';
 
-            // 설정한 사과 개수만큼 나무에 듬뿍 열리게 하기 (최대 위치 개수 제한)
             const displayCount = Math.min(todayData.apples.length, applePositions.length);
             for (let i = 0; i < displayCount; i++) {
                 const pos = applePositions[i];
@@ -144,7 +139,6 @@
             }
         }
 
-        // 나무 클릭 시 행동
         function handleTreeClick() {
             if (!todayData) {
                 openModal();
@@ -153,7 +147,6 @@
             }
         }
 
-        /* 모달 관련 */
         function openModal() { document.getElementById('modal').style.display = 'flex'; }
         function closeModal() { document.getElementById('modal').style.display = 'none'; }
         
@@ -166,20 +159,17 @@
                 return;
             }
 
-            // '0'은 빈 사과(선), '1'은 빨간 사과
             todayData = {
                 task: task,
-                apples: '0'.repeat(Math.min(count, 15)) // 최대 15개 제한
+                apples: '0'.repeat(Math.min(count, 15))
             };
 
             saveData();
             closeModal();
             showDetail();
-            // 입력창 비우기
             document.getElementById('in-task').value = '';
         }
 
-        /* 상세 화면 (사과 채우기) */
         function showDetail() {
             if (!todayData) return;
             document.getElementById('home-view').style.display = 'none';
@@ -192,16 +182,14 @@
             todayData.apples.split('').forEach((state, i) => {
                 const img = document.createElement('img');
                 img.className = 'apple-item';
-                // 0이면 빈 외곽선 사과, 1이면 빨간 사과
                 img.src = state === '1' ? 'apple_red.png' : 'apple_line.png';
                 
                 img.onclick = () => {
                     let arr = todayData.apples.split('');
-                    // 토글 방식: 누르면 바로 빨강(1), 다시 누르면 취소(0)
                     arr[i] = state === '0' ? '1' : '0';
                     todayData.apples = arr.join('');
                     saveData();
-                    showDetail(); // 화면 갱신
+                    showDetail();
                 };
                 container.appendChild(img);
             });
