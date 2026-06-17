@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>사과 나무 키우기🪴</title>
+    <title>오늘의 사과 나무🪴</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍎</text></svg>">
     <style>
         @font-face { font-family: 'TDTDCloudGothic'; src: url('TDTDCloudGothic.ttf'); }
         @font-face { font-family: 'TDTDNeon'; src: url('TDTDNeon.ttf'); }
 
         :root {
-            --bg-color: #FDF5E6; --box-color: #F7EED3; --text-color: #333; --delete-color: #ff6b6b;
+            --bg-color: #FDF5E6; --box-color: #F7EED3; --text-color: #333;
         }
 
         html, body {
@@ -19,189 +19,199 @@
             font-family: 'TDTDNeon', sans-serif;
         }
 
-        body { display: flex; flex-direction: column; align-items: center; }
-        header { width: 100%; text-align: center; margin-top: 50px; font-family: 'TDTDCloudGothic', sans-serif; font-size: 56px; font-weight: bold; }
+        body { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        header { text-align: center; font-family: 'TDTDCloudGothic', sans-serif; font-size: 56px; font-weight: bold; margin-bottom: 20px; }
 
-        .container { display: flex; width: 95%; max-width: 1100px; margin-top: 60px; justify-content: center; align-items: flex-start; gap: 120px; }
-        .tree-section { flex: 1; text-align: center; position: relative; display: flex; flex-direction: column; align-items: center; margin-top: 40px; }
-        .tree-container { position: relative; width: 320px; height: 380px; }
+        /* 메인 나무 화면 */
+        .tree-section { text-align: center; position: relative; cursor: pointer; }
+        .tree-container { position: relative; width: 360px; height: 420px; }
         .pot-img { width: 100%; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); z-index: 5; }
-        .apple-on-tree { position: absolute; font-size: 32px; z-index: 20; filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.1)); opacity: 1 !important; line-height: 1; }
+        .apple-on-tree { position: absolute; font-size: 40px; z-index: 20; filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.15)); line-height: 1; }
+        .task-hint { margin-top: 20px; font-size: 24px; color: #666; font-weight: bold; }
 
-        .list-section { flex: 1.5; background-color: var(--box-color); padding: 25px; border-radius: 20px; box-shadow: 2px 2px 15px rgba(0,0,0,0.05); position: relative; }
-        .date-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; font-family: 'TDTDCloudGothic', sans-serif; }
-        .date-btn { cursor: pointer; font-size: 24px; color: #888; user-select: none; padding: 0 10px; }
-        .today-date { font-size: 22px; font-weight: bold; color: #555; }
-        .not-today-text { opacity: 0.3; }
-
-        .list-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        .list-table th, .list-table td { border-bottom: 1px dotted #ccc; padding: 18px 0px 18px 40px; text-align: left; font-size: 20px; position: relative; vertical-align: middle; }
-        .hidden-subject { color: transparent; user-select: none; }
-        .del-btn { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--delete-color); font-weight: bold; font-size: 26px; cursor: pointer; visibility: hidden; }
-        .list-table tr:hover .del-btn { visibility: visible; }
-        .status-circle { float: right; width: 32px; height: 32px; border-radius: 50%; border: 2px solid #ccc; display: flex; align-items: center; justify-content: center; font-size: 18px; background: #fff; margin-right: 10px; }
-        .add-btn { text-align: center; cursor: pointer; font-size: 32px; padding: 10px; color: #888; }
-        
-        .detail-header-container { position: relative; width: 95%; max-width: 900px; margin: 40px auto 0; padding-bottom: 20px; border-bottom: 2px solid #eee; display: flex; justify-content: center; align-items: center; }
-        #detail-title { font-size: 42px; margin: 0; text-align: center; padding: 0 100px; }
-        .detail-emojis { position: absolute; right: 0; bottom: 15px; display: flex; flex-direction: column; font-size: 24px; line-height: 1.4; text-align: right; }
-
+        /* 모달 (설정창) */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 100; }
-        .modal-content { background: var(--box-color); padding: 40px; border-radius: 20px; width: 90%; max-width: 500px; }
-        .modal-content input { width: 92%; border: none; border-bottom: 1px solid #aaa; background: transparent; margin: 10px 0 25px 0; padding: 8px; font-size: 18px; font-family: 'TDTDNeon'; }
-        .save-btn { background: #fff; border: 1px solid #888; padding: 10px 25px; border-radius: 10px; cursor: pointer; float: right; margin-left: 10px; }
-        #detail-view { display: none; text-align: left; width: 100%; height: 100vh; background-color: var(--bg-color); position: fixed; top: 0; left: 0; z-index: 50; }
-        .apple-row { display: flex; justify-content: center; gap: 15px; margin-top: 60px; flex-wrap: wrap; padding: 0 20px; }
-        .apple-item { width: 70px; height: auto; cursor: pointer; }
+        .modal-content { background: var(--box-color); padding: 40px; border-radius: 20px; width: 90%; max-width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .modal-label { font-size: 18px; font-weight: bold; margin-bottom: 5px; }
+        .modal-content input { width: 95%; border: none; border-bottom: 2px solid #aaa; background: transparent; margin-bottom: 25px; padding: 8px; font-size: 18px; font-family: 'TDTDNeon'; }
+        .btn-row { display: flex; justify-content: flex-end; gap: 10px; }
+        .btn { background: #fff; border: 1px solid #888; padding: 10px 25px; border-radius: 10px; cursor: pointer; font-size: 16px; }
+
+        /* 상세 화면 (사과 채우기) */
+        #detail-view { display: none; text-align: center; width: 100%; height: 100vh; background-color: var(--bg-color); position: fixed; top: 0; left: 0; z-index: 50; padding-top: 50px; box-sizing: border-box; }
+        .detail-header-container { margin: 20px auto; padding-bottom: 20px; border-bottom: 2px solid #eee; width: 90%; max-width: 600px; }
+        #detail-title { font-size: 42px; margin: 0 0 10px 0; font-family: 'TDTDCloudGothic'; }
+        #detail-sub { font-size: 20px; color: #666; }
+        .apple-row { display: flex; justify-content: center; gap: 20px; margin-top: 60px; flex-wrap: wrap; padding: 0 40px; }
+        .apple-item { width: 80px; height: auto; cursor: pointer; transition: transform 0.1s ease; }
+        .apple-item:active { transform: scale(0.9); }
+        .back-btn { margin-top: 60px; cursor: pointer; text-decoration: underline; color: #666; font-size: 24px; display: inline-block; }
     </style>
 </head>
 <body onload="initApp()">
-    <div id="home-view">
-        <header>사과 나무 키우기 🍎</header>
-        <div class="container">
-            <div class="tree-section">
-                <div class="tree-container" id="tree-container">
-                    <img src="tree_pot.png" class="pot-img" onerror="this.src='https://via.placeholder.com/320x380?text=Tree+Image'">
-                </div>
-            </div>
-            <div class="list-section">
-                <div class="date-header">
-                    <div class="date-btn" onclick="changeDate(-1)">&lt;</div>
-                    <div id="today-display" class="today-date"></div>
-                    <div class="date-btn" onclick="changeDate(1)">&gt;</div>
-                </div>
-                <table class="list-table">
-                    <colgroup><col style="width: 40%;"><col style="width: 60%;"></colgroup>
-                    <thead><tr><th>과목</th><th>할 일</th></tr></thead>
-                    <tbody id="task-body"></tbody>
-                </table>
-                <div class="add-btn" onclick="openModal()">+</div>
+
+    <div id="home-view" style="text-align: center;">
+        <header>오늘의 사과 나무 🌳</header>
+        <div class="tree-section" onclick="handleTreeClick()">
+            <div class="tree-container" id="tree-container">
+                <img src="tree_pot.png" class="pot-img" onerror="this.src='https://via.placeholder.com/360x420?text=Tree+Image'">
             </div>
         </div>
+        <div id="task-hint" class="task-hint">나무를 눌러 오늘 할 일을 등록하세요!</div>
     </div>
 
     <div class="modal" id="modal">
         <div class="modal-content">
-            <div class="modal-label">과목:</div><input type="text" id="in-subject">
-            <div class="modal-label">할 일:</div><input type="text" id="in-task">
-            <div class="modal-label">사과 개수:</div><input type="number" id="in-count" value="10">
-            <button class="save-btn" onclick="saveNewTask()">저장</button>
-            <button class="save-btn" onclick="closeModal()">취소</button>
+            <div class="modal-label">오늘 할 일:</div>
+            <input type="text" id="in-task" placeholder="예: 수학 문제집 풀기">
+            <div class="modal-label">목표 사과 개수:</div>
+            <input type="number" id="in-count" value="5" min="1" max="15">
+            <div class="btn-row">
+                <button class="btn" onclick="closeModal()">취소</button>
+                <button class="btn" onclick="saveTask()">시작하기</button>
+            </div>
         </div>
     </div>
 
     <div id="detail-view">
-        <header>사과 나무 키우기 🍎</header>
+        <header>사과 채우기 📋</header>
         <div class="detail-header-container">
-            <h2 id="detail-title"></h2>
-            <div class="detail-emojis"><span>🔴 🤩</span><span>🟢 😉</span></div>
+            <h2 id="detail-title">할 일 제목</h2>
+            <div id="detail-sub">사과를 터치해 빨갛게 익혀주세요!</div>
         </div>
         <div class="apple-row" id="apple-container"></div>
-        <div class="back-btn" onclick="showHome()" style="text-align: center; margin-top: 60px; cursor: pointer; text-decoration: underline; color: #666; font-size: 24px;">HOME</div>
+        <div class="back-btn" onclick="showHome()">나무 보러 가기</div>
     </div>
 
     <script>
-        let currentTargetIndex = null; let currentTasks = []; let currentDate = new Date(); const realTodayStr = getFormatDate(new Date());
-        const applePositions = [{t:40, l:130}, {t:60, l:80}, {t:55, l:180}, {t:100, l:50}, {t:95, l:210}, {t:130, l:100}, {t:125, l:170}, {t:80, l:130}, {t:160, l:60}, {t:170, l:200}, {t:20, l:110}, {t:35, l:165}, {t:110, l:135}, {t:150, l:130}, {t:180, l:100}];
-        
-        function initApp() { renderDate(); loadDataByDate(); }
-        function getFormatDate(date) { const y = date.getFullYear(); const m = String(date.getMonth() + 1).padStart(2, '0'); const d = String(date.getDate()).padStart(2, '0'); return `${y}.${m}.${d}`; }
-        function renderDate() { const days = ['일', '월', '화', '수', '목', '금', '토']; const dateStr = getFormatDate(currentDate); document.getElementById('today-display').innerText = `${dateStr}(${days[currentDate.getDay()]})`; if(dateStr === realTodayStr) document.getElementById('today-display').classList.remove('not-today-text'); else document.getElementById('today-display').classList.add('not-today-text'); }
-        function changeDate(offset) { currentDate.setDate(currentDate.getDate() + offset); renderDate(); loadDataByDate(); }
-        function getDateKey() { return `appleTasks_${getFormatDate(currentDate).replace(/\./g, '')}`; }
-        function loadDataByDate() { currentTasks = JSON.parse(localStorage.getItem(getDateKey())) || []; renderTaskList(); updateCumulativeTree(); }
-        function saveData() { localStorage.setItem(getDateKey(), JSON.stringify(currentTasks)); updateCumulativeTree(); }
+        let todayData = null;
+        // 나무에 사과가 배치될 고정 위치들
+        const applePositions = [{t:50, l:150}, {t:80, l:90}, {t:75, l:210}, {t:130, l:60}, {t:125, l:250}, {t:160, l:120}, {t:155, l:180}, {t:110, l:150}, {t:200, l:80}, {t:210, l:230}, {t:30, l:120}, {t:45, l:195}, {t:140, l:155}, {t:180, l:150}, {t:220, l:120}];
 
-        /* ✨ 나무 사과 결정 로직 */
-        function getDayStatus(tasks) {
-            if (tasks.length === 0) return null;
-            // 모든 할 일의 사과들에 '0'(회색)이 하나도 없어야 함 (일단 다 채움)
-            const isComplete = tasks.every(t => !t.apples.includes('0'));
-            if (!isComplete) return null;
-
-            // 다 채웠는데, 모든 사과가 '2'(빨간색)인가?
-            const isAllRed = tasks.every(t => t.apples.split('').every(s => s === '2'));
-            return isAllRed ? '🍎' : '🍏';
+        function initApp() {
+            checkDailyReset();
+            loadData();
         }
 
-        function updateCumulativeTree() {
+        // 하루마다 리셋하는 로직 (날짜가 바뀌었으면 기존 데이터 삭제)
+        function checkDailyReset() {
+            const todayStr = new Date().toDateString();
+            const lastSavedDay = localStorage.getItem('apple_saved_date');
+            
+            if (lastSavedDay !== todayStr) {
+                localStorage.removeItem('today_apple_task');
+                localStorage.setItem('apple_saved_date', todayStr);
+            }
+        }
+
+        function loadData() {
+            todayData = JSON.parse(localStorage.getItem('today_apple_task'));
+            renderTree();
+        }
+
+        function saveData() {
+            localStorage.setItem('today_apple_task', JSON.stringify(todayData));
+            renderTree();
+        }
+
+        // 메인 나무 화면 그리기
+        function renderTree() {
             const container = document.getElementById('tree-container');
             container.querySelectorAll('.apple-on-tree').forEach(a => a.remove());
-            
-            let fruitList = [];
-            // 모든 날짜를 돌면서 상태 확인
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key.startsWith('appleTasks_')) {
-                    const status = getDayStatus(JSON.parse(localStorage.getItem(key)));
-                    if (status) fruitList.push(status);
-                }
+            const hint = document.getElementById('task-hint');
+
+            if (!todayData) {
+                hint.innerText = "나무를 눌러 오늘 할 일을 등록하세요! 🪴";
+                return;
             }
 
-            fruitList.forEach((emoji, i) => {
-                const pos = applePositions[i % applePositions.length];
+            hint.innerText = `오늘의 목표: ${todayData.task}`;
+
+            // 사과가 다 채워졌는지 확인 ('0'이 하나도 없으면 완수)
+            const isComplete = !todayData.apples.includes('0');
+            const fruitEmoji = isComplete ? '🍎' : '🍏';
+
+            // 설정한 사과 개수만큼 나무에 듬뿍 열리게 하기 (최대 위치 개수 제한)
+            const displayCount = Math.min(todayData.apples.length, applePositions.length);
+            for (let i = 0; i < displayCount; i++) {
+                const pos = applePositions[i];
                 const appleEl = document.createElement('div');
                 appleEl.className = 'apple-on-tree';
-                appleEl.innerText = emoji;
-                appleEl.style.top = pos.t + 'px'; appleEl.style.left = pos.l + 'px';
+                appleEl.innerText = fruitEmoji;
+                appleEl.style.top = pos.t + 'px'; 
+                appleEl.style.left = pos.l + 'px';
                 container.appendChild(appleEl);
-            });
+            }
         }
 
-        function renderTaskList() {
-            const tbody = document.getElementById('task-body');
-            tbody.innerHTML = '';
-            let lastSubject = "";
-            currentTasks.forEach((item, index) => {
-                const tr = document.createElement('tr');
-                tr.onclick = () => showDetail(index);
-                const isDup = (item.subject === lastSubject);
-                const subClass = isDup ? "hidden-subject" : "";
-                lastSubject = item.subject;
-                let emoji = '';
-                const data = item.apples;
-                if (!data.includes('0') && !data.includes('1') && data.includes('2')) emoji = '✅';
-                else if (!data.includes('0') && data.includes('1')) emoji = '❎';
-                else if (data.includes('1') || data.includes('2')) emoji = '❕';
-                tr.innerHTML = `<td><span class="del-btn" onclick="deleteTask(event, ${index})">-</span><span class="${subClass}">${item.subject}</span></td><td>${item.task}<div class="status-circle">${emoji}</div></td>`;
-                tbody.appendChild(tr);
-            });
+        // 나무 클릭 시 행동
+        function handleTreeClick() {
+            if (!todayData) {
+                openModal();
+            } else {
+                showDetail();
+            }
         }
 
-        function showDetail(index) {
-            currentTargetIndex = index;
-            const item = currentTasks[index];
+        /* 모달 관련 */
+        function openModal() { document.getElementById('modal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('modal').style.display = 'none'; }
+        
+        function saveTask() {
+            const task = document.getElementById('in-task').value.trim();
+            const count = parseInt(document.getElementById('in-count').value) || 5;
+            
+            if (!task) {
+                alert("오늘 할 일을 입력해 주세요!");
+                return;
+            }
+
+            // '0'은 빈 사과(선), '1'은 빨간 사과
+            todayData = {
+                task: task,
+                apples: '0'.repeat(Math.min(count, 15)) // 최대 15개 제한
+            };
+
+            saveData();
+            closeModal();
+            showDetail();
+            // 입력창 비우기
+            document.getElementById('in-task').value = '';
+        }
+
+        /* 상세 화면 (사과 채우기) */
+        function showDetail() {
+            if (!todayData) return;
             document.getElementById('home-view').style.display = 'none';
             document.getElementById('detail-view').style.display = 'block';
-            document.getElementById('detail-title').innerText = item.task;
+            document.getElementById('detail-title').innerText = todayData.task;
+
             const container = document.getElementById('apple-container');
             container.innerHTML = '';
-            item.apples.split('').forEach((state, i) => {
+
+            todayData.apples.split('').forEach((state, i) => {
                 const img = document.createElement('img');
                 img.className = 'apple-item';
-                img.src = state === '1' ? 'apple_green.png' : state === '2' ? 'apple_red.png' : 'apple_line.png';
+                // 0이면 빈 외곽선 사과, 1이면 빨간 사과
+                img.src = state === '1' ? 'apple_red.png' : 'apple_line.png';
+                
                 img.onclick = () => {
-                    let arr = item.apples.split('');
-                    arr[i] = ((parseInt(state) + 1) % 3).toString();
-                    item.apples = arr.join('');
-                    saveData(); showDetail(index);
+                    let arr = todayData.apples.split('');
+                    // 토글 방식: 누르면 바로 빨강(1), 다시 누르면 취소(0)
+                    arr[i] = state === '0' ? '1' : '0';
+                    todayData.apples = arr.join('');
+                    saveData();
+                    showDetail(); // 화면 갱신
                 };
                 container.appendChild(img);
             });
         }
 
-        function showHome() { renderTaskList(); document.getElementById('home-view').style.display = 'block'; document.getElementById('detail-view').style.display = 'none'; }
-        function saveNewTask() {
-            const sub = document.getElementById('in-subject').value, task = document.getElementById('in-task').value, count = parseInt(document.getElementById('in-count').value) || 10;
-            if(!sub || !task) return;
-            currentTasks.push({ subject: sub, task: task, apples: '0'.repeat(count) });
-            currentTasks.sort((a, b) => a.subject.localeCompare(b.subject));
-            saveData(); renderTaskList(); closeModal();
-            document.getElementById('in-subject').value = ''; document.getElementById('in-task').value = '';
+        function showHome() {
+            document.getElementById('home-view').style.display = 'block';
+            document.getElementById('detail-view').style.display = 'none';
+            renderTree();
         }
-        function deleteTask(event, index) { event.stopPropagation(); if(confirm("삭제할까요?")) { currentTasks.splice(index, 1); saveData(); renderTaskList(); } }
-        function openModal() { document.getElementById('modal').style.display = 'flex'; }
-        function closeModal() { document.getElementById('modal').style.display = 'none'; }
     </script>
 </body>
 </html>
