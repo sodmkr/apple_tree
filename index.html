@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>오늘의 사과 나무🪴</title>
+    <title>오늘의 사과 나무</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍎</text></svg>">
     <style>
         @font-face { font-family: 'TDTDCloudGothic'; src: url('TDTDCloudGothic.ttf'); }
@@ -19,26 +19,49 @@
             font-family: 'TDTDNeon', sans-serif;
         }
 
-        body { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        /* 메인 화면 전체 레이아웃 분배 */
+        body { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: space-between; /* 위아래 공간을 넓게 분배 */
+            padding: 40px 0;
+            box-sizing: border-box;
+        }
         
-        /* 타이틀 폰트 크기 48px로 조정 및 위치 레이어 고정 */
+        /* 타이틀을 최대한 화면 맨 위쪽으로 배치 */
         header { 
             text-align: center; 
             font-family: 'TDTDCloudGothic', sans-serif; 
             font-size: 48px; 
             font-weight: bold; 
-            margin-bottom: 10px; 
+            margin-top: 10px;
+            margin-bottom: 0;
             position: relative; 
             z-index: 50; 
         }
 
-        /* 메인 나무 화면 */
-        .tree-section { text-align: center; position: relative; cursor: pointer; z-index: 10; }
+        /* 메인 나무 화면 - 여백을 주어 타이틀과 떨어뜨림 */
+        .tree-section { 
+            text-align: center; 
+            position: relative; 
+            cursor: pointer; 
+            z-index: 10; 
+            margin-top: auto; /* 타이틀과 멀어지도록 아래로 밀기 */
+            margin-bottom: auto;
+        }
         .tree-container { position: relative; width: 360px; height: 420px; }
         .pot-img { width: 100%; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); z-index: 5; }
         
-        /* 나무 한가운데에 예쁘게 열릴 단 하나의 사과 스타일 */
-        .apple-on-tree { position: absolute; font-size: 55px; z-index: 20; filter: drop-shadow(1px 1px 3px rgba(0,0,0,0.2)); line-height: 1; }
+        /* 사과 위치 조정: 기둥이 아닌 위쪽 초록색 이파리 중심(t: 60px)으로 바짝 올림 */
+        .apple-on-tree { 
+            position: absolute; 
+            font-size: 55px; 
+            z-index: 20; 
+            filter: drop-shadow(1px 1px 3px rgba(0,0,0,0.2)); 
+            line-height: 1; 
+            cursor: pointer;
+        }
 
         /* 모달 (설정창) */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 100; }
@@ -60,9 +83,10 @@
 </head>
 <body onload="initApp()">
 
-    <div id="home-view" style="text-align: center;">
-        <header>오늘의 사과 나무 🌳</header>
-        <div class="tree-section" onclick="handleTreeClick()">
+    <div id="home-view" style="text-align: center; display: flex; flex-direction: column; height: 100%; justify-content: space-between;">
+        <header>오늘의 사과 나무</header>
+        
+        <div class="tree-section" onclick="openModal()">
             <div class="tree-container" id="tree-container">
                 <img src="tree_pot.png" class="pot-img" onerror="this.src='https://via.placeholder.com/360x420?text=Tree+Image'">
             </div>
@@ -70,8 +94,7 @@
     </div>
 
     <div class="modal" id="modal">
-        <div class="modal-content">
-            <div class="modal-label">오늘 할 일:</div>
+        <div class="modal-content" onclick="event.stopPropagation()"> <div class="modal-label">오늘 할 일:</div>
             <input type="text" id="in-task" placeholder="예: 수학 문제집 풀기">
             <div class="modal-label">목표 사과 개수:</div>
             <input type="number" id="in-count" value="5" min="1" max="15">
@@ -83,7 +106,7 @@
     </div>
 
     <div id="detail-view">
-        <header>사과 채우기 📋</header>
+        <header>사과 채우기 🍎</header>
         <div class="detail-header-container">
             <div id="detail-sub">사과를 터치해 빨갛게 익혀주세요!</div>
         </div>
@@ -93,8 +116,8 @@
 
     <script>
         let todayData = null;
-        // 나무 중앙 근처에 사과가 예쁘게 위치하도록 고정 좌표 잡음
-        const singleApplePosition = {t: 110, l: 150};
+        // 사과 위치를 이파리 정중앙 높이(t: 60)로 수정완료!
+        const singleApplePosition = {t: 60, l: 150};
 
         function initApp() {
             checkDailyReset();
@@ -127,26 +150,23 @@
 
             if (!todayData) return;
 
-            // 상세 화면의 사과문자열 중 '0'(빈 사과)이 하나라도 있다면 미완성(초록사과 🍏)
-            // '0'이 하나도 없고 전부 '1'로 채워졌다면 완성(빨간사과 🍎)
             const isComplete = !todayData.apples.includes('0');
             const fruitEmoji = isComplete ? '🍎' : '🍏';
 
-            // 할 일이 등록되어 있다면 무조건 딱 '1개'만 나무 중심에 노출
+            // 사과 엘리먼트 생성
             const appleEl = document.createElement('div');
             appleEl.className = 'apple-on-tree';
             appleEl.innerText = fruitEmoji;
             appleEl.style.top = singleApplePosition.t + 'px'; 
             appleEl.style.left = singleApplePosition.l + 'px';
-            container.appendChild(appleEl);
-        }
-
-        function handleTreeClick() {
-            if (!todayData) {
-                openModal();
-            } else {
+            
+            // ⭐ 핵심: 사과를 누르면 나무 등록창으로 안 가고 바로 '상세 화면'으로 가도록 설정!
+            appleEl.onclick = (event) => {
+                event.stopPropagation(); // 나무 클릭 이벤트가 실행되지 않도록 막아줌
                 showDetail();
-            }
+            };
+
+            container.appendChild(appleEl);
         }
 
         function openModal() { document.getElementById('modal').style.display = 'flex'; }
