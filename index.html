@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🍎오늘의 사과 나무</title>
+    <title>오늘의 사과 나무🪴</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍎</text></svg>">
     <style>
         @font-face { font-family: 'TDTDCloudGothic'; src: url('TDTDCloudGothic.ttf'); }
@@ -21,11 +21,11 @@
 
         body { display: flex; flex-direction: column; align-items: center; justify-content: center; }
         
-        /* 타이틀 글자가 나무 위로 오도록 설정 */
+        /* 타이틀 폰트 크기 48px로 조정 및 위치 레이어 고정 */
         header { 
             text-align: center; 
             font-family: 'TDTDCloudGothic', sans-serif; 
-            font-size: 32px; 
+            font-size: 48px; 
             font-weight: bold; 
             margin-bottom: 10px; 
             position: relative; 
@@ -36,10 +36,9 @@
         .tree-section { text-align: center; position: relative; cursor: pointer; z-index: 10; }
         .tree-container { position: relative; width: 360px; height: 420px; }
         .pot-img { width: 100%; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); z-index: 5; }
-        .apple-on-tree { position: absolute; font-size: 40px; z-index: 20; filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.15)); line-height: 1; }
         
-        /* 하단 문구가 나무에 너무 붙지 않게 여백 조정 */
-        .task-hint { margin-top: 40px; font-size: 24px; color: #666; font-weight: bold; }
+        /* 나무 한가운데에 예쁘게 열릴 단 하나의 사과 스타일 */
+        .apple-on-tree { position: absolute; font-size: 55px; z-index: 20; filter: drop-shadow(1px 1px 3px rgba(0,0,0,0.2)); line-height: 1; }
 
         /* 모달 (설정창) */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 100; }
@@ -62,13 +61,12 @@
 <body onload="initApp()">
 
     <div id="home-view" style="text-align: center;">
-        <header>🍎오늘의 사과 나무</header>
+        <header>오늘의 사과 나무 🌳</header>
         <div class="tree-section" onclick="handleTreeClick()">
             <div class="tree-container" id="tree-container">
                 <img src="tree_pot.png" class="pot-img" onerror="this.src='https://via.placeholder.com/360x420?text=Tree+Image'">
             </div>
         </div>
-        <div id="task-hint" class="task-hint">나무를 눌러 오늘 할 일을 등록하세요!</div>
     </div>
 
     <div class="modal" id="modal">
@@ -85,7 +83,7 @@
     </div>
 
     <div id="detail-view">
-        <header>사과 채우기 🍎</header>
+        <header>사과 채우기 📋</header>
         <div class="detail-header-container">
             <div id="detail-sub">사과를 터치해 빨갛게 익혀주세요!</div>
         </div>
@@ -95,7 +93,8 @@
 
     <script>
         let todayData = null;
-        const applePositions = [{t:50, l:150}, {t:80, l:90}, {t:75, l:210}, {t:130, l:60}, {t:125, l:250}, {t:160, l:120}, {t:155, l:180}, {t:110, l:150}, {t:200, l:80}, {t:210, l:230}, {t:30, l:120}, {t:45, l:195}, {t:140, l:155}, {t:180, l:150}, {t:220, l:120}];
+        // 나무 중앙 근처에 사과가 예쁘게 위치하도록 고정 좌표 잡음
+        const singleApplePosition = {t: 110, l: 150};
 
         function initApp() {
             checkDailyReset();
@@ -125,28 +124,21 @@
         function renderTree() {
             const container = document.getElementById('tree-container');
             container.querySelectorAll('.apple-on-tree').forEach(a => a.remove());
-            const hint = document.getElementById('task-hint');
 
-            if (!todayData) {
-                hint.innerText = "나무를 눌러 오늘 할 일을 등록하세요! 🪴";
-                return;
-            }
+            if (!todayData) return;
 
-            hint.innerText = `오늘의 목표: ${todayData.task}`;
-
+            // 상세 화면의 사과문자열 중 '0'(빈 사과)이 하나라도 있다면 미완성(초록사과 🍏)
+            // '0'이 하나도 없고 전부 '1'로 채워졌다면 완성(빨간사과 🍎)
             const isComplete = !todayData.apples.includes('0');
             const fruitEmoji = isComplete ? '🍎' : '🍏';
 
-            const displayCount = Math.min(todayData.apples.length, applePositions.length);
-            for (let i = 0; i < displayCount; i++) {
-                const pos = applePositions[i];
-                const appleEl = document.createElement('div');
-                appleEl.className = 'apple-on-tree';
-                appleEl.innerText = fruitEmoji;
-                appleEl.style.top = pos.t + 'px'; 
-                appleEl.style.left = pos.l + 'px';
-                container.appendChild(appleEl);
-            }
+            // 할 일이 등록되어 있다면 무조건 딱 '1개'만 나무 중심에 노출
+            const appleEl = document.createElement('div');
+            appleEl.className = 'apple-on-tree';
+            appleEl.innerText = fruitEmoji;
+            appleEl.style.top = singleApplePosition.t + 'px'; 
+            appleEl.style.left = singleApplePosition.l + 'px';
+            container.appendChild(appleEl);
         }
 
         function handleTreeClick() {
